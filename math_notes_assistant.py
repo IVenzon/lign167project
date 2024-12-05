@@ -150,9 +150,10 @@ if st.session_state['notes_text']:
             st.markdown(f"**❓ Question:** {value[0]}")
             # Use a checkbox to toggle answer visibility
             checkbox_key = f"show_answer_{key}"
-            show_answer = st.checkbox("Show/Hide Answer", key=checkbox_key)
+            show_answer = st.checkbox("Show", key=checkbox_key)
             if show_answer:
                 st.markdown(f"**✔️ Answer:** {value[1]}")
+
 else:
     st.info("Upload a file and click 'Generate Flashcards' to create flashcards.")
 
