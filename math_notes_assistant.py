@@ -77,6 +77,7 @@ if "previous_flashcards" not in st.session_state:
     st.session_state["previous_flashcards"] = ""
     
 # File Upload
+st.subheader("📂 Upload Notes")
 uploaded_file = st.file_uploader("Upload a PDF or Text file", type=["pdf", "txt"])
 if uploaded_file:
     if uploaded_file.type == "application/pdf":
@@ -85,18 +86,22 @@ if uploaded_file:
         st.session_state["notes_text"] = uploaded_file.read().decode("utf-8")
     st.success("File uploaded successfully!")
 
-# Summarization Section
-st.subheader("📝 Summarization")
-if st.session_state["notes_text"]:
-    level_of_detail = st.slider("Select the level of detail for the summary:", 1, 10, 5)
-    if st.button("Summarize Notes"):
-        st.session_state["summary"] = summarize_large_notes(st.session_state["notes_text"], level_of_detail)
-        st.success("Summary generated successfully!")
-    if st.session_state["summary"]:  # Persist and render the summary
-        st.markdown("### 📋 Summary Output")
-        st.markdown(st.session_state["summary"], unsafe_allow_html=True)
-else:
-    st.info("Upload a file and click 'Summarize Notes' to generate a summary.")
+tab1, tab2, tab3 = st.tabs(["Summarization", "Question Answering", "Flashcards"])
+
+
+with tab1:
+        # Summarization Section
+        st.subheader("📝 Summarization")
+        if st.session_state["notes_text"]:
+            level_of_detail = st.slider("Select the level of detail for the summary:", 1, 10, 5)
+            if st.button("Summarize Notes"):
+                st.session_state["summary"] = summarize_large_notes(st.session_state["notes_text"], level_of_detail)
+                st.success("Summary generated successfully!")
+            if st.session_state["summary"]:  # Persist and render the summary
+                st.markdown("### 📋 Summary Output")
+                st.markdown(st.session_state["summary"], unsafe_allow_html=True)
+        else:
+            st.info("Upload a file and click 'Summarize Notes' to generate a summary.")
 
 # Question Answering Section
 st.subheader("❓ Ask a Question")
@@ -113,8 +118,61 @@ if st.session_state["notes_text"] and question:
 elif not st.session_state["notes_text"]:
     st.info("Upload a file and enter a question to get an answer.")
 
-# Flashcards Generation Section
-st.subheader("🧠 Test Yourself with Flashcards")
+
+with tab2:
+    # Question Answering Section
+    st.subheader("❓ Ask a Question")
+    if st.session_state["notes_text"]:
+        question = st.text_input("Enter your question:")
+    if st.session_state["notes_text"] and question:
+        if st.button("Ask"):
+            # Use the summary if available, otherwise use the full notes
+            source_text = st.session_state["summary"] if st.session_state["summary"] else st.session_state["notes_text"]
+            st.session_state["answer"] = answer_question(source_text, question)
+        if st.session_state["answer"]:  # Persist and render the answer
+            st.markdown("### 💬 Answer Output")
+            st.markdown(st.session_state["answer"], unsafe_allow_html=True)
+    else:
+        st.info("Upload a file and enter a question to get an answer.")
+
+
+with tab3:
+    # Flashcards Generation Section
+    st.subheader("🧠 Test Yourself with Flashcards")
+
+    if st.session_state['notes_text']:
+        # select difficulty level
+        difficulty = st.selectbox("Select the difficulty level of the flashcards:", ("Easy", "Medium", "Hard"))
+        if st.button("Generate Flashcards"):
+            # if flashcards already exist, save them to previous_flashcards
+            if st.session_state["flashcards"]:
+                st.session_state["previous_flashcards"] = st.session_state["flashcards"]
+            # generate new flashcards
+            flashcards_string = generate_flashcards(st.session_state["notes_text"], st.session_state['previous_flashcards'], difficulty)
+            # process chatgpt output
+            flashcards_list = flashcards_string.split('\n')
+            flashcard_dict = {}
+            ff = [x for x in flashcards_list if x]
+            for i in range(0, len(ff), 3):
+                flashcard_dict[ff[i]] = (ff[i+1], ff[i+2])
+            # save flashcards to session state
+            st.session_state["flashcards"] = flashcard_dict
+            st.success("Flashcards generated successfully!")
+        if st.session_state["flashcards"]:
+            # render flashcards
+            st.markdown("#### 📇 Your Flashcards:")
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Q1", "Q2", "Q3", "Q4", "Q5"])
+            # for key, value in st.session_state["flashcards"].items():
+            for tab, (key, value) in zip([tab1, tab2, tab3, tab4, tab5], st.session_state["flashcards"].items()):
+                tab.markdown(f"#### **🃏 {key.upper()} 🃏**")
+                tab.markdown(f"**❓ Question:** {value[0]}")
+                # Use a checkbox to toggle answer visibility
+                checkbox_key = f"show_answer_{key}"
+                show_answer = tab.checkbox("Show Answer", key=checkbox_key)
+                if show_answer:
+                    tab.markdown(f"**✔️ Answer:** {value[1]}")
+    else:
+        st.info("Upload a file and click 'Generate Flashcards' to create flashcards.")
 
 if st.session_state['notes_text']:
     # Select difficulty level
@@ -157,6 +215,7 @@ if st.session_state['notes_text']:
 
 else:
     st.info("Upload a file and click 'Generate Flashcards' to create flashcards.")
+
 
 # Footer
 st.markdown("---")
