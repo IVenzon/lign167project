@@ -103,22 +103,6 @@ with tab1:
         else:
             st.info("Upload a file and click 'Summarize Notes' to generate a summary.")
 
-# Question Answering Section
-st.subheader("❓ Ask a Question")
-question = st.text_input("Enter your question:")
-if st.session_state["notes_text"] and question:
-    if st.button("Ask"):
-        # Use the summary if available, otherwise use the full notes
-        source_text = st.session_state["summary"] if st.session_state["summary"] else st.session_state["notes_text"]
-        st.session_state["answer"] = answer_question(source_text, question)
-        st.success("Answer generated successfully!")
-    if st.session_state["answer"]:  # Persist and render the answer
-        st.markdown("### 💬 Answer Output")
-        st.markdown(st.session_state["answer"], unsafe_allow_html=True)
-elif not st.session_state["notes_text"]:
-    st.info("Upload a file and enter a question to get an answer.")
-
-
 with tab2:
     # Question Answering Section
     st.subheader("❓ Ask a Question")
@@ -173,49 +157,6 @@ with tab3:
                     tab.markdown(f"**✔️ Answer:** {value[1]}")
     else:
         st.info("Upload a file and click 'Generate Flashcards' to create flashcards.")
-
-if st.session_state['notes_text']:
-    # Select difficulty level
-    difficulty = st.selectbox("Select the difficulty level of the flashcards:", ("Easy", "Medium", "Hard"))
-    if st.button("Generate Flashcards"):
-        # If flashcards already exist, save them to previous_flashcards as a string
-        if st.session_state["flashcards"]:
-            previous_cards = []
-            for key, value in st.session_state["flashcards"].items():
-                previous_cards.append(f"{key}\n{value[0]}\n{value[1]}")
-            st.session_state["previous_flashcards"] = "\n".join(previous_cards)
-        # Generate new flashcards
-        flashcards_string = generate_flashcards(st.session_state["notes_text"], st.session_state['previous_flashcards'], difficulty)
-        # Process AI output
-        flashcards_list = flashcards_string.strip().split('\n')
-        flashcard_dict = {}
-        ff = [x.strip() for x in flashcards_list if x.strip()]
-        for i in range(0, len(ff), 3):
-            if i+2 < len(ff):
-                key = ff[i]
-                question = ff[i+1]
-                answer = ff[i+2]
-                flashcard_dict[key] = (question, answer)
-        # Save flashcards to session state
-        st.session_state["flashcards"] = flashcard_dict
-        st.success("Flashcards generated successfully!")
-    if st.session_state["flashcards"]:
-        # Render flashcards
-        st.markdown("📇 **Your Flashcards:**")
-        for key, value in st.session_state["flashcards"].items():
-            st.markdown("---")
-            st.markdown(f"🃏 **{key.upper()}** 🃏")
-            st.markdown(f"**❓ Question:** {value[0]}")
-            # Use a checkbox to toggle answer visibility
-            checkbox_key = f"show_answer_{key}"
-            show_answer = st.checkbox("Show Answer", key=checkbox_key)
-            if show_answer:
-                st.markdown(f"**✔️ Answer:** {value[1]}")
-
-
-else:
-    st.info("Upload a file and click 'Generate Flashcards' to create flashcards.")
-
 
 # Footer
 st.markdown("---")
