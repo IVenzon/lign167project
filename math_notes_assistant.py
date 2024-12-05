@@ -141,15 +141,15 @@ with tab3:
             st.success("Flashcards generated successfully!")
         if st.session_state["flashcards"]:
             # render flashcards
-            st.markdown("📇 Your Flashcards:")
+            st.markdown("#### 📇 Your Flashcards:")
             tab1, tab2, tab3, tab4, tab5 = st.tabs(["Q1", "Q2", "Q3", "Q4", "Q5"])
             # for key, value in st.session_state["flashcards"].items():
             for tab, (key, value) in zip([tab1, tab2, tab3, tab4, tab5], st.session_state["flashcards"].items()):
-                tab.markdown(f"🃏 **{key.upper()}** 🃏")
-                tab.markdown(f"**❓ {value[0]}**")
+                tab.markdown(f"#### **🃏 {key.upper()} 🃏**")
+                tab.markdown(f"**❓ Question:** {value[0]}")
                 # Use a checkbox to toggle answer visibility
                 checkbox_key = f"show_answer_{key}"
-                show_answer = tab.checkbox("Show/Hide Answer", key=checkbox_key)
+                show_answer = tab.checkbox("Show Answer", key=checkbox_key)
                 if show_answer:
                     tab.markdown(f"**✔️ Answer:** {value[1]}")
     else:
