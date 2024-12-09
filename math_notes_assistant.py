@@ -59,7 +59,7 @@ def generate_flashcards(notes_text, previous_flashcards, difficulty):
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant which generates five flashcards based on the lecture notes."},
-                {"role": "user", "content": f"Create a list of five question-answer pairs with a difficulty of {difficulty} based on the following content:\n\n{notes_text}\n\nEnsure that the questions are appropriate to the difficulty level and are different from the questions in {previous_flashcards} if any. Format as follows:\nQ1\nQuestion 1 text\nAnswer 1 text\nQ2\nQuestion 2 text\nAnswer 2 text\n... and so on for Q5. Do not include any extra text or formatting."}
+                {"role": "user", "content": f"Create a list of five question-answer pairs with a difficulty of {difficulty} based on the following content:\n\n{notes_text}\n\nEnsure that the questions are appropriate to the difficulty level and are different from the questions in {previous_flashcards} if any. Format as follows:\nQ1\nQuestion 1 text\nAnswer 1 text\nQ2\nQuestion 2 text\nAnswer 2 text\n... and so on for Q5. If you need to write something using LaTeX, use github-flavored markdown (i.e. to write the equation $x^2$, you should write `$$x^2$$), but do not add any newline characters. Do not include any extra text or formatting otherwise."}
             ]
         )
         flashcard_list = response.choices[0].message.content.strip()
