@@ -6,6 +6,8 @@ import PyPDF2
 # Replace YOUR_API_KEY with your actual API key
 client = OpenAI(api_key="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")
 
+global_formatting_rules = "For any part of your response using LaTeX formatting, use github-style markdown. For example, to write the equation $x^2$, you should write `$$x^2$$`."
+
 def extract_text_from_pdf(pdf_file):
     """Extract text from a PDF file."""
     reader = PyPDF2.PdfReader(pdf_file)
@@ -14,6 +16,14 @@ def extract_text_from_pdf(pdf_file):
         text += page.extract_text()
     return text
 
+def extract_pages_from_pdf(pdf_file):
+    """Extract text from each page of a PDF file."""
+    reader = PyPDF2.PdfReader(pdf_file)
+    pages = []
+    for i, page in enumerate(reader.pages):
+        pages.append(f"page #{i + 1}: \n\n" + page.extract_text())
+    return pages
+
 def summarize_large_notes(notes_text, lod):
     """Summarize large notes using OpenAI API."""
     try:
@@ -21,21 +31,21 @@ def summarize_large_notes(notes_text, lod):
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant summarizing lecture notes."},
-                {"role": "user", "content": f"Summarize these notes: {notes_text}. On a scale of 1 to 10, with 1 being a short and sweet overview and 10 being an intricate, in-depth dive into the material with multiple examples, summarize these notes with a level of detail equaling {lod}."}
+                {"role": "user", "content": f"Summarize these notes: {notes_text}. On a scale of 1 to 10, with 1 being a short and sweet overview and 10 being an intricate, in-depth dive into the material with multiple examples, summarize these notes with a level of detail equaling {lod}." + global_formatting_rules}
             ]
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"An error occurred: {e}"
 
-def answer_question(notes_text, question):
+def answer_question(notes_text, notes_pages, question):
     """Answer a question using the uploaded notes."""
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant answering questions about lecture notes."},
-                {"role": "user", "content": f"Based on these notes: {notes_text}, answer this question: {question}"}
+                {"role": "user", "content": f"Based on these notes: {notes_text}, answer this question: {question} as if you were a tutor/teacher/professor. Be clear and concise in your answer. Create a section at the bottom of your answer that contains all the references you used to answer the question. For the important/key pieces of your answer, refer to the following pages: {notes_pages} and cite the exact page page you got the information from. Also include the portions of the text you used to get that answer. There is no need to cite any of the authors of the provided text. Format your references as follows: '**(Page Number)** - *('Section' Section Number if provided)*: (Reference Text)." + global_formatting_rules}
             ]
         )
         return response.choices[0].message.content.strip()
@@ -64,6 +74,8 @@ st.write("Upload your notes, summarize, and ask questions interactively.")
 # Initialize session state variables
 if "notes_text" not in st.session_state:
     st.session_state["notes_text"] = ""
+if "notes_pages" not in st.session_state:
+    st.session_state["notes_pages"] = []
 if "summary" not in st.session_state:
     st.session_state["summary"] = ""
 if "answer" not in st.session_state:
@@ -82,26 +94,28 @@ uploaded_file = st.file_uploader("Upload a PDF or Text file", type=["pdf", "txt"
 if uploaded_file:
     if uploaded_file.type == "application/pdf":
         st.session_state["notes_text"] = extract_text_from_pdf(uploaded_file)
+        st.session_state["notes_pages"] = extract_pages_from_pdf(uploaded_file)
     elif uploaded_file.type == "text/plain":
         st.session_state["notes_text"] = uploaded_file.read().decode("utf-8")
+        st.session_state["notes_pages"] = [st.session_state["notes_text"]]
     st.success("File uploaded successfully!")
 
 tab1, tab2, tab3 = st.tabs(["Summarization", "Question Answering", "Flashcards"])
 
 
 with tab1:
-        # Summarization Section
-        st.subheader("📝 Summarization")
-        if st.session_state["notes_text"]:
-            level_of_detail = st.slider("Select the level of detail for the summary:", 1, 10, 5)
-            if st.button("Summarize Notes"):
-                st.session_state["summary"] = summarize_large_notes(st.session_state["notes_text"], level_of_detail)
-                st.success("Summary generated successfully!")
-            if st.session_state["summary"]:  # Persist and render the summary
-                st.markdown("### 📋 Summary Output")
-                st.markdown(st.session_state["summary"], unsafe_allow_html=True)
-        else:
-            st.info("Upload a file and click 'Summarize Notes' to generate a summary.")
+    # Summarization Section
+    st.subheader("📝 Summarization")
+    if st.session_state["notes_text"]:
+        level_of_detail = st.slider("Select the level of detail for the summary:", 1, 10, 5)
+        if st.button("Summarize Notes"):
+            st.session_state["summary"] = summarize_large_notes(st.session_state["notes_text"], level_of_detail)
+            st.success("Summary generated successfully!")
+        if st.session_state["summary"]:  # Persist and render the summary
+            st.markdown("### 📋 Summary Output")
+            st.markdown(st.session_state["summary"], unsafe_allow_html=True)
+    else:
+        st.info("Upload a file and click 'Summarize Notes' to generate a summary.")
 
 with tab2:
     # Question Answering Section
@@ -112,7 +126,8 @@ with tab2:
         if st.button("Ask"):
             # Use the summary if available, otherwise use the full notes
             source_text = st.session_state["summary"] if st.session_state["summary"] else st.session_state["notes_text"]
-            st.session_state["answer"] = answer_question(source_text, question)
+            source_pages = st.session_state["notes_pages"]
+            st.session_state["answer"] = answer_question(source_text, source_pages, question)
         if st.session_state["answer"]:  # Persist and render the answer
             st.markdown("### 💬 Answer Output")
             st.markdown(st.session_state["answer"], unsafe_allow_html=True)
