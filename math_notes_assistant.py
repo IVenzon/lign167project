@@ -2,10 +2,20 @@ import streamlit as st
 from openai import OpenAI
 import PyPDF2
 
+"""
+LIGN 167 Final Project: Math Notes Assistant
+By Jeremy Abondano, Hunter Brownell, Ian Justin Venzon
+----------------------------------------------
+This Streamlit app allows you to upload your math notes, summarize them, ask questions interactively, and test yourself with flashcards.
+Several sections of this code were generated using OpenAI's GPT-4.o model as well as GitHub Copilot.
+UI elements were created using Streamlit (https://docs.streamlit.io/).
+"""
+
 # Initialize OpenAI client
 # Replace YOUR_API_KEY with your actual API key
 client = OpenAI(api_key="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")
 
+# Idea for 'github-flavored markdown' came from here: https://discuss.streamlit.io/t/dynamic-displaying-for-llm-output-latex-inline-full-line-and-non-latex-sign/82483
 global_formatting_rules = "For any part of your response using LaTeX formatting, use github-style markdown. For example, to write the equation $x^2$, you should write `$$x^2$$`."
 
 def extract_text_from_pdf(pdf_file):
@@ -80,9 +90,6 @@ if "summary" not in st.session_state:
     st.session_state["summary"] = ""
 if "answer" not in st.session_state:
     st.session_state["answer"] = ""
-if "index" not in st.session_state:
-    st.session_state["index"] = 0
-    st.session_state["show_answer"] = False
 if "flashcards" not in st.session_state:
     st.session_state["flashcards"] = {}
 if "previous_flashcards" not in st.session_state:
@@ -100,8 +107,8 @@ if uploaded_file:
         st.session_state["notes_pages"] = [st.session_state["notes_text"]]
     st.success("File uploaded successfully!")
 
+# Tabs
 tab1, tab2, tab3 = st.tabs(["Summarization", "Question Answering", "Flashcards"])
-
 
 with tab1:
     # Summarization Section
@@ -134,11 +141,9 @@ with tab2:
     else:
         st.info("Upload a file and enter a question to get an answer.")
 
-
 with tab3:
     # Flashcards Generation Section
     st.subheader("🧠 Test Yourself with Flashcards")
-
     if st.session_state['notes_text']:
         # select difficulty level
         difficulty = st.selectbox("Select the difficulty level of the flashcards:", ("Easy", "Medium", "Hard"))
@@ -161,7 +166,6 @@ with tab3:
             # render flashcards
             st.markdown("#### 📇 Your Flashcards:")
             tab1, tab2, tab3, tab4, tab5 = st.tabs(["Q1", "Q2", "Q3", "Q4", "Q5"])
-            # for key, value in st.session_state["flashcards"].items():
             for tab, (key, value) in zip([tab1, tab2, tab3, tab4, tab5], st.session_state["flashcards"].items()):
                 tab.markdown(f"#### **🃏 {key.upper()} 🃏**")
                 tab.markdown(f"**❓ Question:** {value[0]}")
@@ -176,5 +180,5 @@ with tab3:
 # Footer
 st.markdown("---")
 st.markdown("🔗 Powered by OpenAI and Streamlit | Created for Math Notes Analysis.")
-st.markdown("🙂 Project by Jeremy Abondano, Hunter Brownell, Ian Justin Venzon for LIGN 167 Fall 2024.")
+st.markdown("😇 Final Project by *Jeremy Abondano, Hunter Brownell, Ian Justin Venzon* for LIGN 167 Fall 2024.")
 
