@@ -69,7 +69,7 @@ def generate_flashcards(notes_text, previous_flashcards, difficulty):
 
 # Streamlit UI
 st.title("📚 Math Notes Assistant")
-st.write("Upload your notes, summarize, and ask questions interactively.")
+st.write("Upload your notes, summarize, ask questions interactively, and test yourself with flashcards!")
 
 # Initialize session state variables
 if "notes_text" not in st.session_state:
@@ -176,4 +176,5 @@ with tab3:
 # Footer
 st.markdown("---")
 st.markdown("🔗 Powered by OpenAI and Streamlit | Created for Math Notes Analysis.")
+st.markdown("🙂 Project by Jeremy Abondano, Hunter Brownell, Ian Justin Venzon for LIGN 167 Fall 2024.")
 
