@@ -2,14 +2,14 @@ import streamlit as st
 from openai import OpenAI
 import PyPDF2
 
-"""
-LIGN 167 Final Project: Math Notes Assistant
-By Jeremy Abondano, Hunter Brownell, Ian Justin Venzon
-----------------------------------------------
-This Streamlit app allows you to upload your math notes, summarize them, ask questions interactively, and test yourself with flashcards.
-Several sections of this code were generated using OpenAI's GPT-4.o model as well as GitHub Copilot.
-UI elements were created using Streamlit (https://docs.streamlit.io/).
-"""
+# """
+# LIGN 167 Final Project: Math Notes Assistant
+# By Jeremy Abondano, Hunter Brownell, Ian Justin Venzon
+# ----------------------------------------------
+# This Streamlit app allows you to upload your math notes, summarize them, ask questions interactively, and test yourself with flashcards.
+# Several sections of this code were generated using OpenAI's GPT-4.o model as well as GitHub Copilot.
+# UI elements were created using Streamlit (https://docs.streamlit.io/).
+# """
 
 # Initialize OpenAI client
 # Replace YOUR_API_KEY with your actual API key
@@ -180,5 +180,5 @@ with tab3:
 # Footer
 st.markdown("---")
 st.markdown("🔗 Powered by OpenAI and Streamlit | Created for Math Notes Analysis.")
-st.markdown("😇 Final Project by *Jeremy Abondano, Hunter Brownell, Ian Justin Venzon* for LIGN 167 Fall 2024.")
+st.markdown("😇 Final Project by Jeremy Abondano, Hunter Brownell, Ian Justin Venzon for LIGN 167 Fall 2024.")
 
