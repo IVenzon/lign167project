@@ -13,7 +13,7 @@ import PyPDF2
 
 # Initialize OpenAI client
 # Replace YOUR_API_KEY with your actual API key
-client = OpenAI(api_key="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")
+client = YOUR_API_KEY
 
 # Idea for 'github-flavored markdown' came from here: https://discuss.streamlit.io/t/dynamic-displaying-for-llm-output-latex-inline-full-line-and-non-latex-sign/82483
 global_formatting_rules = "For any part of your response using LaTeX formatting, use github-style markdown. For example, to write the equation $x^2$, you should write `$$x^2$$`."
