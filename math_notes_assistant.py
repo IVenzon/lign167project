@@ -13,7 +13,8 @@ import PyPDF2
 
 # Initialize OpenAI client
 # Replace YOUR_API_KEY with your actual API key
-client = OpenAI(api_key="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")
+YOUR_API_KEY = ""
+client = OpenAI(api_key=YOUR_API_KEY)
 
 # Idea for 'github-flavored markdown' came from here: https://discuss.streamlit.io/t/dynamic-displaying-for-llm-output-latex-inline-full-line-and-non-latex-sign/82483
 global_formatting_rules = "For any part of your response using LaTeX formatting, use github-style markdown. For example, to write the equation $x^2$, you should write `$$x^2$$`."
@@ -41,7 +42,7 @@ def summarize_large_notes(notes_text, lod):
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant summarizing lecture notes."},
-                {"role": "user", "content": f"Summarize these notes: {notes_text}. On a scale of 1 to 10, with 1 being a short and sweet overview and 10 being an intricate, in-depth dive into the material with multiple examples, summarize these notes with a level of detail equaling {lod}." + global_formatting_rules}
+                {"role": "user", "content": f"Summarize these notes: {notes_text}. On a scale of 1 to 10, with 1 being a short and sweet overview and 10 being an intricate, in-depth dive into the material with multiple examples, summarize these notes with a level of detail equaling {lod}." + global_formatting_rules + "At any level of detail, make sure you follow this LaTeX formatting rule."}
             ]
         )
         return response.choices[0].message.content.strip()
